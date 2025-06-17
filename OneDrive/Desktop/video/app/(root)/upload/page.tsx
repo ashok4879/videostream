@@ -24,8 +24,9 @@ const uploadFileToBunny = (
     },
     body: file,
   }).then((response) => {
-    if (!response.ok)
+    if (!response.ok) {
       throw new Error(`Upload failed with status ${response.status}`);
+    }
   });
 
 const UploadPage = () => {
@@ -39,6 +40,7 @@ const UploadPage = () => {
     tags: "",
     visibility: "public",
   });
+
   const video = useFileInput(MAX_VIDEO_SIZE);
   const thumbnail = useFileInput(MAX_THUMBNAIL_SIZE);
 
@@ -106,22 +108,38 @@ const UploadPage = () => {
         return;
       }
 
+      // Debug log input data
+      console.log("Form data:", formData);
+      console.log("Video file:", video.file);
+      console.log("Thumbnail file:", thumbnail.file);
+
       const {
         videoId,
         uploadUrl: videoUploadUrl,
         accessKey: videoAccessKey,
       } = await getVideoUploadUrl();
 
+      console.log("Received from getVideoUploadUrl:");
+      console.log("videoId:", videoId);
+      console.log("videoUploadUrl:", videoUploadUrl);
+      console.log("videoAccessKey:", videoAccessKey);
+
       if (!videoUploadUrl || !videoAccessKey)
         throw new Error("Failed to get video upload credentials");
 
       await uploadFileToBunny(video.file, videoUploadUrl, videoAccessKey);
+      console.log("✅ Video uploaded successfully");
 
       const {
         uploadUrl: thumbnailUploadUrl,
         cdnUrl: thumbnailCdnUrl,
         accessKey: thumbnailAccessKey,
       } = await getThumbnailUploadUrl(videoId);
+
+      console.log("Received from getThumbnailUploadUrl:");
+      console.log("thumbnailUploadUrl:", thumbnailUploadUrl);
+      console.log("thumbnailCdnUrl:", thumbnailCdnUrl);
+      console.log("thumbnailAccessKey:", thumbnailAccessKey);
 
       if (!thumbnailUploadUrl || !thumbnailCdnUrl || !thumbnailAccessKey)
         throw new Error("Failed to get thumbnail upload credentials");
@@ -131,6 +149,7 @@ const UploadPage = () => {
         thumbnailUploadUrl,
         thumbnailAccessKey
       );
+      console.log("✅ Thumbnail uploaded successfully");
 
       await saveVideoDetails({
         videoId,
@@ -139,9 +158,11 @@ const UploadPage = () => {
         duration: videoDuration,
       });
 
+      console.log("✅ Video details saved");
       router.push(`/video/${videoId}`);
     } catch (error) {
       console.error("Error submitting form:", error);
+      setError((error as Error).message);
     } finally {
       setIsSubmitting(false);
     }
