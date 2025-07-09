@@ -1,5 +1,4 @@
 import Image from "next/image";
-
 const EmptyState = ({ icon, title, description }: EmptyStateProps) => {
   return (
     <section className="empty-state">
@@ -13,5 +12,4 @@ const EmptyState = ({ icon, title, description }: EmptyStateProps) => {
     </section>
   );
 };
-
 export default EmptyState;

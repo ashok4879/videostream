@@ -15,7 +15,6 @@ const SignIn = () => {
           />
           <h1>SnapCast</h1>
         </Link>
-
         <div className="description">
           <section>
             <figure>

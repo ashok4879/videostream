@@ -1,19 +1,15 @@
 import { EmptyState, Pagination, SharedHeader, VideoCard } from "@/components";
 import { getAllVideos } from "@/lib/actions/video";
-
 const page = async ({ searchParams }: SearchParams) => {
   const { query, filter, page } = await searchParams;
-
   const { videos, pagination } = await getAllVideos(
     query,
     filter,
     Number(page) || 1
   );
-
   return (
     <main className="wrapper page">
       <SharedHeader subHeader="Public Library" title="All Videos" />
-
       {videos?.length > 0 ? (
         <section className="video-grid">
           {videos.map(({ video, user }) => (
@@ -38,7 +34,6 @@ const page = async ({ searchParams }: SearchParams) => {
           description="Try adjusting your search."
         />
       )}
-
       {pagination?.totalPages > 1 && (
         <Pagination
           currentPage={pagination.currentPage}
@@ -50,5 +45,4 @@ const page = async ({ searchParams }: SearchParams) => {
     </main>
   );
 };
-
 export default page;

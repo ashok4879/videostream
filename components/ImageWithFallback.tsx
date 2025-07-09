@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
 const ImageWithFallback = ({
   fallback = "/assets/images/dummy.jpg",
   alt,
@@ -10,12 +9,10 @@ const ImageWithFallback = ({
 }: ImageWithFallbackProps) => {
   const [error, setError] = useState<boolean | null>(null);
   const [imgSrc, setImgSrc] = useState<string>(src || fallback);
-
   useEffect(() => {
     setError(null);
     setImgSrc(src || fallback);
   }, [src, fallback]);
-
   return (
     <Image
       alt={alt}
@@ -25,5 +22,4 @@ const ImageWithFallback = ({
     />
   );
 };
-
 export default ImageWithFallback;
