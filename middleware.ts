@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import aj, { createMiddleware, detectBot, shield } from "./lib/arcjet";
+import aj, { createMiddleware, detectBot, shield } from "./lib/arcjet"; // correct import
+import { auth } from "@/lib/auth";
 
-// Arcjet rules
+// Arcjet rule setup
 const validate = aj
   .withRule(
     shield({
@@ -15,20 +16,30 @@ const validate = aj
     })
   );
 
-// 👇 Combined Arcjet + Auth logic
-export default createMiddleware(validate, async (request: NextRequest) => {
-  // Lazy import auth
-  const { auth } = await import("@/lib/auth");
+// Middleware
+export default createMiddleware(validate, async (req: NextRequest) => {
+  const path = req.nextUrl.pathname;
 
-  const session = await auth.api.getSession({ headers: request.headers });
+  // Allowlisted public routes
+  const isPublic =
+    path === "/sign-in" ||
+    path === "/favicon.ico" ||
+    path.startsWith("/_next") ||
+    path.startsWith("/assets") ||
+    path.startsWith("/api");
+
+  if (isPublic) return NextResponse.next();
+
+  const session = await auth.api.getSession({ headers: req.headers });
 
   if (!session) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+    return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 
   return NextResponse.next();
 });
 
+// Matcher config
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|sign-in|assets).*)"],
-}; 
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|assets|api|sign-in).*)"],
+};
