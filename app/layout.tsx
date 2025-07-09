@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { Karla } from "next/font/google";
 import "./globals.css";
-
 const geistKarla = Karla({
   variable: "--font-geist-karla",
   subsets: ["latin"],
 });
-
 export const metadata: Metadata = {
   title: "SnapCast",
   description: "A Screen Sharing App",
@@ -14,7 +12,6 @@ export const metadata: Metadata = {
     icon: "/assets/icons/logo.svg",
   },
 };
-
 export default function Layout({
   children,
 }: Readonly<{

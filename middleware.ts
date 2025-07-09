@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import aj, { createMiddleware, detectBot, shield } from "./lib/arcjet"; // correct import
+import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-
-// Arcjet rule setup
+import aj, { createMiddleware, detectBot, shield } from "./lib/arcjet";
+export async function middleware(request: NextRequest) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+  return NextResponse.next();
+}
 const validate = aj
   .withRule(
     shield({
@@ -12,34 +20,12 @@ const validate = aj
   .withRule(
     detectBot({
       mode: "LIVE",
-      allow: ["CATEGORY:SEARCH_ENGINE", "G00G1E_CRAWLER"],
+      allow: ["CATEGORY:SEARCH_ENGINE", "G00G1E_CRAWLER"], // allow other bots if you want to.
     })
   );
-
-// Middleware
-export default createMiddleware(validate, async (req: NextRequest) => {
-  const path = req.nextUrl.pathname;
-
-  // Allowlisted public routes
-  const isPublic =
-    path === "/sign-in" ||
-    path === "/favicon.ico" ||
-    path.startsWith("/_next") ||
-    path.startsWith("/assets") ||
-    path.startsWith("/api");
-
-  if (isPublic) return NextResponse.next();
-
-  const session = await auth.api.getSession({ headers: req.headers });
-
-  if (!session) {
-    return NextResponse.redirect(new URL("/sign-in", req.url));
-  }
-
-  return NextResponse.next();
-});
-
-// Matcher config
+export default createMiddleware(validate);
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|assets|api|sign-in).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|sign-in|assets).*)"],
 };
+
+// ⨯ [TypeError: Body is unusable: Body has already been read]
